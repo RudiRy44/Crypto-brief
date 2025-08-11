@@ -1,0 +1,25 @@
+name: Crypto Agent
+
+on:
+  schedule:
+    # Daily brief at 08:00 Beijing (00:00 UTC)
+    - cron: "0 0 * * *"
+    # Intraday alerts every 5 min (we filter hours in code)
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install requests
+      - name: Run daily brief or alerts
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python scripts/agent.py
